@@ -68,7 +68,7 @@ class RunnerManagerSubmissionTests(SimpleTestCase):
         """Skip a runner returning HTTP 200 with JSON payload of unexpected type."""
         response = Mock()
         response.status_code = 200
-        response.content = b"[\"proxy\", \"error\"]"
+        response.content = b'["proxy", "error"]'
         response.headers = {"Content-Type": "application/json"}
         response.json.return_value = ["proxy", "error"]
         mocked_try_send_to_rm.return_value = response
