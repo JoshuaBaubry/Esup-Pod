@@ -2556,7 +2556,7 @@ def video_oembed(request):
             "provider": data["provider_url"],
             "video_url": video_url,
             "slug_private": "%s/" % slug_private if slug_private else "",
-            "title": video.title
+            "title": video.title,
         }
         data["thumbnail_url"] = "%s:%s" % (protocole, video.get_thumbnail_url())
         if hasattr(video.thumbnail, "file"):
