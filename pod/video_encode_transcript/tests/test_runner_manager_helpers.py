@@ -157,9 +157,7 @@ class RunnerManagerHelperTests(SimpleTestCase):
         )
         video = SimpleNamespace(id=12)
 
-        with patch(
-            "pod.dressing.models.Dressing.objects.filter"
-        ) as mock_filter, patch(
+        with patch("pod.dressing.models.Dressing.objects.filter") as mock_filter, patch(
             "pod.dressing.models.Dressing.objects.get", return_value=dressing
         ), patch(
             "pod.video_encode_transcript.runner_manager.Site.objects.get_current",
@@ -189,9 +187,7 @@ class RunnerManagerHelperTests(SimpleTestCase):
         """Keep params unchanged when no dressing is linked to the video."""
         params = {}
 
-        with patch(
-            "pod.dressing.models.Dressing.objects.filter"
-        ) as mock_filter, patch(
+        with patch("pod.dressing.models.Dressing.objects.filter") as mock_filter, patch(
             "pod.video_encode_transcript.runner_manager.Site.objects.get_current",
             return_value=SimpleNamespace(domain="example.com"),
         ):
@@ -247,7 +243,10 @@ class RunnerManagerHelperTests(SimpleTestCase):
             SimpleNamespace(id=3),
         ]
         queryset = Mock()
-        queryset.order_by.return_value.values_list.return_value.first.side_effect = [2, None]
+        queryset.order_by.return_value.values_list.return_value.first.side_effect = [
+            2,
+            None,
+        ]
 
         with patch(
             "pod.video_encode_transcript.runner_manager.Task.objects.filter",
@@ -319,7 +318,9 @@ class RunnerManagerHelperTests(SimpleTestCase):
         mock_cut.assert_called_once_with(params_with_video, video)
         mock_dressing.assert_called_once_with(params_with_video, video)
 
-    def test_prepare_transcription_parameters_covers_normal_and_legacy_modes(self) -> None:
+    def test_prepare_transcription_parameters_covers_normal_and_legacy_modes(
+        self,
+    ) -> None:
         """Build transcription params with resolved language or legacy fallback."""
         video = SimpleNamespace(
             transcript="fr",
@@ -784,7 +785,9 @@ class RunnerManagerHelperTests(SimpleTestCase):
         ), patch(
             "pod.video_encode_transcript.runner_manager.get_object_or_404",
             side_effect=RuntimeError("boom"),
-        ), patch("pod.video_encode_transcript.runner_manager.log.error") as mock_error:
+        ), patch(
+            "pod.video_encode_transcript.runner_manager.log.error"
+        ) as mock_error:
             encode_video(9)
 
         mock_error.assert_called_once()
@@ -860,7 +863,9 @@ class RunnerManagerHelperTests(SimpleTestCase):
         ), patch(
             "pod.video_encode_transcript.runner_manager.Recording.objects.get",
             side_effect=Recording.DoesNotExist,
-        ), patch("pod.video_encode_transcript.runner_manager.log.error") as mock_error:
+        ), patch(
+            "pod.video_encode_transcript.runner_manager.log.error"
+        ) as mock_error:
             encode_studio_recording(17)
         mock_error.assert_called_once()
 
@@ -945,7 +950,9 @@ class RunnerManagerHelperTests(SimpleTestCase):
         ), patch(
             "pod.video_encode_transcript.runner_manager.get_object_or_404",
             side_effect=RuntimeError("boom"),
-        ), patch("pod.video_encode_transcript.runner_manager.log.error") as mock_error:
+        ), patch(
+            "pod.video_encode_transcript.runner_manager.log.error"
+        ) as mock_error:
             transcript_video(23)
 
         mock_error.assert_called_once()
@@ -1079,7 +1086,9 @@ class RunnerManagerEditTaskTests(SimpleTestCase):
         ), patch(
             "pod.video_encode_transcript.runner_manager.Task.objects.filter",
             side_effect=RuntimeError("boom"),
-        ), patch("pod.video_encode_transcript.runner_manager.log.error") as mock_error:
+        ), patch(
+            "pod.video_encode_transcript.runner_manager.log.error"
+        ) as mock_error:
             _edit_task(
                 video_id=4,
                 recording_id=None,
