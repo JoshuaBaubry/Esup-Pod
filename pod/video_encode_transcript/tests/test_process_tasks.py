@@ -54,7 +54,9 @@ class ProcessTasksCommandPayloadTests(SimpleTestCase):
             video="videos/sample.mp4",
         )
 
-        result = self.command._submit_encoding_task(video, self.site, [self.runner_manager])
+        result = self.command._submit_encoding_task(
+            video, self.site, [self.runner_manager]
+        )
 
         self.assertTrue(result)
         payload = mock_submit_runner_task_to_managers.call_args.kwargs["data"]
@@ -116,7 +118,9 @@ class ProcessTasksCommandPayloadTests(SimpleTestCase):
         )
         video.get_video_mp3.return_value = None
 
-        result = self.command._submit_transcription_task(video, self.site, [self.runner_manager])
+        result = self.command._submit_transcription_task(
+            video, self.site, [self.runner_manager]
+        )
 
         self.assertTrue(result)
         payload = mock_submit_runner_task_to_managers.call_args.kwargs["data"]
