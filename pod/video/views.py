@@ -9,11 +9,15 @@ from concurrent import futures
 from datetime import date
 from itertools import chain
 
+
 import pandas
 from chunked_upload.models import ChunkedUpload
 from chunked_upload.views import ChunkedUploadCompleteView, ChunkedUploadView
 from dateutil.parser import parse
 from django.conf import settings
+
+from django.http import HttpResponsePermanentRedirect
+
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.contrib.auth.models import User
@@ -76,16 +80,16 @@ from pod.playlist.utils import (
     playlist_can_be_displayed,
     user_can_see_playlist_video,
 )
-from pod.video.forms import (
-    AdvancedNotesForm,
-    ChannelForm,
-    FrontThemeForm,
-    NoteCommentsForm,
-    VideoDeleteForm,
-    VideoForm,
-    VideoPasswordForm,
-    VideoVersionForm,
-)
+
+
+from pod.video.forms import VideoForm, VideoVersionForm, ArchiveChoiceForm
+from pod.video.forms import ChannelForm
+from pod.video.forms import FrontThemeForm
+from pod.video.forms import VideoPasswordForm
+from pod.video.forms import VideoDeleteForm
+from pod.video.forms import AdvancedNotesForm, NoteCommentsForm
+
+
 from pod.video.models import (
     NOTES_STATUS,
     AdvancedNotes,
@@ -105,7 +109,11 @@ from pod.video.models import (
     get_transcription_choices,
 )
 from pod.video.rest_views import ChannelSerializer
-from pod.video.utils import get_videos as video_get_videos
+from pod.video.utils import (
+    get_videos as video_get_videos,
+    archive_video,
+    archive_and_get_link,
+)
 
 from .context_processors import get_available_videos
 from .utils import (
@@ -121,8 +129,10 @@ from .utils import (
     sort_videos_list,
 )
 
-# from django.contrib.auth.hashers import check_password
+WARN_DEADLINES = getattr(settings, "WARN_DEADLINES", [60, 30, 7])
 
+RALLONGE_RESPIT_DAYS = getattr(settings, "RALLONGE_RESPIT_DAYS", 365)
+ENABLE_PAGE_OBSO_MAIL = getattr(settings, "ENABLE_PAGE_OBSO_MAIL", False)
 
 RESTRICT_EDIT_VIDEO_ACCESS_TO_STAFF_ONLY = getattr(
     settings, "RESTRICT_EDIT_VIDEO_ACCESS_TO_STAFF_ONLY", False
@@ -3923,3 +3933,151 @@ def get_owners_for_videos_on_dashboard(request):
     users_list = list(users_qs.values(*VALUES).order_by("last_name")[:20])
 
     return HttpResponse(json.dumps(users_list), content_type="application/json")
+
+
+@login_required(redirect_field_name="referrer")
+def video_respit(request, slug):
+    """
+    This function will render the interface which is reachable by the user from the reminder email with the concerned link.
+    The interface allows to extend, archive or delete a video in the appropriated context.
+    """
+    display_or_not = able_or_not_respit(slug, request.user)
+    form = ArchiveChoiceForm(request.POST)
+
+    vid = get_object_or_404(Video, slug=slug)
+
+    return render(
+        request,
+        "videos/video_respist_choice.html",
+        {
+            "form": form,
+            "slug": slug,
+            "video": vid,
+            "ENABLE_PAGE_OBSO_MAIL": ENABLE_PAGE_OBSO_MAIL,
+            "display_or_not": display_or_not,
+        },
+    )
+
+
+def valid_form_respit(request, slug=None):
+    """
+    This function will launch the appropriate code and render the appropriate interface after the submission of the video respit form.
+    """
+    user = request.user
+    if request.method == "POST":
+        if user.is_authenticated:
+            action = request.POST["action"]
+            if (
+                action == "Delete"
+            ):  # If the user choose the action "delete" in the interface.
+                return HttpResponsePermanentRedirect("/video/delete/" + slug)
+            if (
+                action == "Extend"
+            ):  # If the user choose the action "extend" in the interface.
+                if able_or_not_respit(slug, request.user) is True:
+                    return render(
+                        request,
+                        "videos/prolong_or_not.html",
+                        {"slug": slug, "RALLONGE_RESPIT_DAYS": RALLONGE_RESPIT_DAYS},
+                    )
+                else:
+                    raise Exception("You can't extender your video more.")
+
+            if action == "Archive":
+                return render(request, "videos/archive_or_not.html", {"slug": slug})
+
+
+@login_required(redirect_field_name="referrer")
+def well_archived_or_not(request, slug):
+    """
+    This function will say if the archive action has succeed or not and display this message in an interface.
+    """
+    try:
+        Video.objects.get(slug=slug)
+        exist = True
+    except Video.DoesNotExist:
+        exist = False
+
+    return render(request, "videos/well_archived.html", {"exist": exist})
+
+
+@login_required(redirect_field_name="referrer")
+def well_prolonged_or_not(request, slug):
+    """
+    This function will say if the extend action has succeed or not and display this message in an interface.
+    """
+    vid = Video.objects.get(slug=slug)
+
+    return render(
+        request, "videos/well_prolonged.html", {"new_date_delete": vid.date_delete}
+    )
+
+
+@login_required(redirect_field_name="referrer")
+def archive_and_download(request, slug):
+    """
+    This function will create a zip archive package and launch a download of it in the user browser.
+    """
+
+    url = archive_and_get_link(slug, "video_package")
+    return render(request, "videos/archive_download.html", {"url": url, "slug": slug})
+
+
+def able_or_not_respit(slug, user=None):
+    """
+    This function will say if we have the right conditions to display the respit form or not.
+    """
+
+    all_warn = WARN_DEADLINES
+    higher_warn = 0
+
+    for aw in all_warn:
+        if higher_warn <= aw:
+            higher_warn = aw
+
+    try:
+        vid = Video.objects.get(slug=slug)
+    except Exception :
+        return False
+
+    if user is not None:
+        if not user.is_authenticated:
+            return False
+        if user != vid.owner and user not in vid.additional_owners.all():
+            return False
+
+    # If we have more than the maximum DeadLine days before the date_delete
+    step_date = vid.date_delete - timedelta(days=higher_warn)
+    display_or_not = date.today() >= step_date
+
+    return display_or_not
+
+
+@login_required(redirect_field_name="referrer")
+def go_archive(request, slug=None):
+    """
+    This function will launch a archive process and say if it has worked or not on an interface.
+    """
+    if able_or_not_respit(slug, request.user) is True and ENABLE_PAGE_OBSO_MAIL:
+        archive_video(Video.objects.get(slug=slug))
+        return HttpResponsePermanentRedirect("/video/well/archived/or/not/" + slug)
+    else:
+        return HttpResponseBadRequest(
+            "Impossible to archive. This service is not available."
+        )
+
+
+@login_required(redirect_field_name="referrer")
+def go_prolong(request, slug):
+    """
+    This function will extend a video about RALLONGE_RESPIT_DAYS days and display the new delete_date.
+    """
+    if able_or_not_respit(slug, request.user) is True and ENABLE_PAGE_OBSO_MAIL:
+        vivi = Video.objects.get(slug=slug)
+        vivi.date_delete = vivi.date_delete + timedelta(days=RALLONGE_RESPIT_DAYS)
+        vivi.save()
+        return HttpResponsePermanentRedirect("/video/well/prolonged/or/not/" + slug)
+    else:
+        return HttpResponseBadRequest(
+            "Impossible to extend. This service is not available."
+        )
