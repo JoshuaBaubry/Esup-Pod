@@ -1,4 +1,5 @@
 """Test the Obsolete videos."""
+
 import tempfile
 
 from django.test import override_settings
@@ -363,11 +364,11 @@ class ValidFormRespitTestCase(TestCase):
 
     def test_read_csv_action(self):
         """Test read_archived_csv in utils.py directly"""
-        csv_content = (
-            "2024-01-01;John Doe;john@example.com;Affil;Estab;123;Title;url;type;2024-01-02\n"
-        )
+        csv_content = "2024-01-01;John Doe;john@example.com;Affil;Estab;123;Title;url;type;2024-01-02\n"
 
-        with tempfile.NamedTemporaryFile(mode="w+", delete=False, encoding="utf-8") as tmp:
+        with tempfile.NamedTemporaryFile(
+            mode="w+", delete=False, encoding="utf-8"
+        ) as tmp:
             tmp.write(csv_content)
             tmp_path = tmp.name
 
@@ -383,12 +384,12 @@ class ValidFormRespitTestCase(TestCase):
     @patch("pod.video.utils.store_as_dublincore")
     @patch("pod.video.utils.os.makedirs")
     def test_archive_pack_move_and_real_mode(
-            self,
-            mock_makedirs,
-            mock_store_dc,
-            mock_export,
-            mock_copy_archive,
-            mock_move_archive,
+        self,
+        mock_makedirs,
+        mock_store_dc,
+        mock_export,
+        mock_copy_archive,
+        mock_move_archive,
     ):
         archive_pack("/tmp/test", "John", self.video1, only_copy=False, dry_mode=False)
 

@@ -182,7 +182,7 @@ class Command(BaseCommand):
                         ) from e
 
                     # Insert repist in BDD
-                    daysmore = mod.calcul(data_to_add,self.dry_mode)
+                    daysmore = mod.calcul(data_to_add, self.dry_mode)
 
                     if self.dry_mode is False:
                         p.date_delete = p.date_delete + timedelta(days=daysmore)
@@ -245,7 +245,7 @@ class Command(BaseCommand):
                             "scheme": URL_SCHEME,
                             "url": video.get_full_url(),
                             "title": video.title,
-                            "daysmore": daysmore
+                            "daysmore": daysmore,
                         }
                         msg_html += "</li>"
 
