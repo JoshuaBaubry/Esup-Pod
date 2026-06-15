@@ -780,9 +780,7 @@ def _log_youtube_adaptive_limit(yt_video, selected_stream, yt_client: str) -> No
 def _select_best_youtube_progressive_stream(yt_video):
     """Select the best progressive stream, capped to 1080p when available."""
     progressive_streams = (
-        yt_video.streams.filter(progressive=True)
-        .order_by("resolution")
-        .desc()
+        yt_video.streams.filter(progressive=True).order_by("resolution").desc()
     )
     fallback_stream = None
     for stream in progressive_streams:

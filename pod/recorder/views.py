@@ -934,8 +934,7 @@ def digest_capture_admin(request, name):
 
     state = request.POST.get("state")
     return HttpResponse(
-        _("%(name)s set to %(state)s")
-        % {"name": escape(name), "state": escape(state)},
+        _("%(name)s set to %(state)s") % {"name": escape(name), "state": escape(state)},
         content_type="text/plain; charset=utf-8",
     )
 
