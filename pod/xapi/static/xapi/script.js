@@ -15,7 +15,10 @@ function create_UUID() {
   if (globalThis.crypto && typeof globalThis.crypto.randomUUID === "function") {
     return globalThis.crypto.randomUUID();
   }
-  if (globalThis.crypto && typeof globalThis.crypto.getRandomValues === "function") {
+  if (
+    globalThis.crypto &&
+    typeof globalThis.crypto.getRandomValues === "function"
+  ) {
     const bytes = new Uint8Array(16);
     globalThis.crypto.getRandomValues(bytes);
     bytes[6] = (bytes[6] & 0x0f) | 0x40;

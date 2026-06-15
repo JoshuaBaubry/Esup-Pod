@@ -175,7 +175,10 @@ class Comment extends HTMLElement {
     comment_content.setAttribute("class", "comment_content");
 
     const commentHeader = document.createElement("div");
-    commentHeader.setAttribute("class", "comment_content_header inline_flex_space");
+    commentHeader.setAttribute(
+      "class",
+      "comment_content_header inline_flex_space",
+    );
 
     const userName = document.createElement("h3");
     userName.setAttribute("class", "user_name");
@@ -205,7 +208,9 @@ class Comment extends HTMLElement {
     comment_content.appendChild(commentBody);
     comment_content.appendChild(commentFooter);
     comment_container.appendChild(comment_content);
-    const contentBody = comment_container.querySelector(".comment_content_body");
+    const contentBody = comment_container.querySelector(
+      ".comment_content_body",
+    );
     if (contentBody) {
       if (content instanceof Node) {
         contentBody.appendChild(content);
