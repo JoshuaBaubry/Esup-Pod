@@ -210,7 +210,9 @@ class Command(BaseCommand):
 
             custom_message_page_obso_mail += "<br>\n"
 
-            custom_message_page_obso_mail = self.html_options(custom_message_page_obso_mail, video)
+            custom_message_page_obso_mail = self.html_options(
+                custom_message_page_obso_mail, video
+            )
 
             custom_message_page_obso_mail += (
                 "<a href='"
@@ -305,14 +307,22 @@ class Command(BaseCommand):
             options.append(_("extend the duration of your video"))
         if is_archiving_authorized(video):
             options.append(
-                _("archive it (it will be unpublished and no longer accessible)"))
+                _("archive it (it will be unpublished and no longer accessible)")
+            )
         if DELETION_GRANTED:
             options.append(_("delete it (after saving it)"))
         custom_message_page_obso_mail += "<p>" + _("You can choose to...") + "</p><ul>"
         if options:
-            custom_message_page_obso_mail += "".join(f"<li>{option}</li>" for option in options)
-        custom_message_page_obso_mail += ("<li>" + _("download it along with all its associated data") + "</li></ul>"
-                                          + _("...by clicking here:") + " ")
+            custom_message_page_obso_mail += "".join(
+                f"<li>{option}</li>" for option in options
+            )
+        custom_message_page_obso_mail += (
+            "<li>"
+            + _("download it along with all its associated data")
+            + "</li></ul>"
+            + _("...by clicking here:")
+            + " "
+        )
         return custom_message_page_obso_mail
 
     def notify_manager_of_obsolete_video(self, list_video: dict) -> None:

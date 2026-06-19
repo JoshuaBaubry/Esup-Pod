@@ -127,7 +127,9 @@ class Command(BaseCommand):
         """Send or skip manager notification based on notif_list content."""
         self.stdout.write("\n")
         if not notif_list:
-            self.stdout.write("** No calculated respit. Don't send the mail to the managers. **")
+            self.stdout.write(
+                "** No calculated respit. Don't send the mail to the managers. **"
+            )
         else:
             self.stdout.write("** Send the mail to the managers. **")
             self._send_mail_to_managers(notif_list)
@@ -231,7 +233,7 @@ class Command(BaseCommand):
                 "scheme": URL_SCHEME,
                 "url": video.get_full_url(),
                 "title": video.title,
-                "daysmore": daysmore
+                "daysmore": daysmore,
             }
             msg_html += "</li>"
         msg_html += "</ul></br>Have a good day."

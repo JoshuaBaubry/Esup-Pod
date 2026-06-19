@@ -22,8 +22,7 @@ from django.urls import reverse
 from django.utils.translation import gettext_lazy as _
 
 from pod.video.models import Category, Discipline, Type, Video, VideoToDelete
-from pod.video_encode_transcript.models import (EncodingAudio, EncodingVideo,
-                                                PlaylistVideo)
+from pod.video_encode_transcript.models import EncodingAudio, EncodingVideo, PlaylistVideo
 
 logger = logging.getLogger(__name__)
 User = get_user_model()
@@ -112,6 +111,7 @@ def is_archiving_authorized(vid: Video) -> bool:
         allowed_video = True
 
     return bool(allowed_affiliations and is_owner_affiliations_allowed and allowed_video)
+
 
 ###############################################################
 # EMAIL

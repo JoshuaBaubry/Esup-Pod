@@ -3,7 +3,6 @@ from os.path import basename
 from django.conf import settings
 from pod.video.models import Video
 
-
 RESPIT_MODEL_PARAMETERS = getattr(
     settings,
     "RESPIT_MODEL_PARAMETERS",
@@ -13,7 +12,7 @@ RESPIT_MODEL_PARAMETERS = getattr(
             "excluded_title_terms": [],
             "excluded_discipline_terms": [],
         },
-    }
+    },
 )
 
 
@@ -55,10 +54,19 @@ PARAM_MATCHERS = {
 DEFAULT_MATCHER = PARAM_MATCHERS["id"]
 
 
-def match_criterion(param_name: str, param_value, criterion_value, dry_mode: bool = True) -> bool:
+def match_criterion(
+    param_name: str, param_value, criterion_value, dry_mode: bool = True
+) -> bool:
     """Check a criterion"""
     if dry_mode:
-        print("\tCheck criterion ", param_name, " = ", param_value, " compared with ", criterion_value)
+        print(
+            "\tCheck criterion ",
+            param_name,
+            " = ",
+            param_value,
+            " compared with ",
+            criterion_value,
+        )
 
     if param_value is None:
         return False

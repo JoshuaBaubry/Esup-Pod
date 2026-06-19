@@ -4044,7 +4044,7 @@ def able_or_not_respit(slug, user=None):
 
     try:
         vid = Video.objects.get(slug=slug)
-    except Exception :
+    except Exception:
         return False
 
     if user is not None:
