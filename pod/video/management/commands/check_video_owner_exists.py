@@ -2,6 +2,7 @@
 
 *  run with 'python manage.py check_video_owner_exists [--dry]'
 """
+
 from django.core.management.base import BaseCommand
 from django.conf import settings
 from django.db import transaction
@@ -53,6 +54,7 @@ DEFAULT_FROM_EMAIL = getattr(settings, "DEFAULT_FROM_EMAIL", "noreply@univ.fr")
 
 class Command(BaseCommand):
     """Check if video owners still exist in LDAP."""
+
     help = "Check if video owners still exist in LDAP"
     dry_mode = False
     ldap_existing_usernames = []
@@ -102,8 +104,7 @@ class Command(BaseCommand):
             self.stdout.write(self.style.WARNING("Running in dry mode"))
 
         videos = (
-            Video.objects
-            .select_related("owner")
+            Video.objects.select_related("owner")
             .prefetch_related("additional_owners")
             .order_by("id")
         )
@@ -117,23 +118,30 @@ class Command(BaseCommand):
         for video in videos:
             video_count += 1
             owner = video.owner
-            if owner.username == ARCHIVE_OWNER_USERNAME or owner.username == DEFAULT_OWNER_USERNAME:
+            if (
+                owner.username == ARCHIVE_OWNER_USERNAME
+                or owner.username == DEFAULT_OWNER_USERNAME
+            ):
                 continue
 
             if self.user_exists_in_ldap(conn, owner.username):
                 continue
 
-            promoted_count = self.reaffect_video(conn, default_owner, dry_mode, promoted_count, video)
+            promoted_count = self.reaffect_video(
+                conn, default_owner, dry_mode, promoted_count, video
+            )
 
         conn.unbind()
 
         self.notify_manager()
 
-        self.stdout.write(self.style.SUCCESS(
-            f"Finished {video_count} videos.\n{promoted_count} owner(s) would be promoted."
-            if dry_mode
-            else f"Finished {video_count} videos.\n{promoted_count} owner(s) promoted."
-        ))
+        self.stdout.write(
+            self.style.SUCCESS(
+                f"Finished {video_count} videos.\n{promoted_count} owner(s) would be promoted."
+                if dry_mode
+                else f"Finished {video_count} videos.\n{promoted_count} owner(s) promoted."
+            )
+        )
 
     def reaffect_video(self, conn, default_owner, dry_mode, promoted_count, video):
         """Reaffect video to an owner who is in LDAP or a default user and notify him/her."""
@@ -162,27 +170,27 @@ class Command(BaseCommand):
                     video.owner = valid_additional_owner
                     video.save()
                     video.additional_owners.remove(valid_additional_owner)
-                if valid_additional_owner != default_owner :
+                if valid_additional_owner != default_owner:
                     self.notify_user(video)
 
             if (
-                    USE_ESTABLISHMENT
-                    and MANAGERS
-                    and video.owner.owner.establishment.lower() in dict(MANAGERS)
+                USE_ESTABLISHMENT
+                and MANAGERS
+                and video.owner.owner.establishment.lower() in dict(MANAGERS)
             ):
-                self.all_reaffected_videos.setdefault(estab, {})[video] = (
-                    _("%(old)s replaced by %(new)s") % {
-                        "old": self.format_owner(old_owner),
-                        "new": self.format_owner(valid_additional_owner)
-                    }
-                )
+                self.all_reaffected_videos.setdefault(estab, {})[video] = _(
+                    "%(old)s replaced by %(new)s"
+                ) % {
+                    "old": self.format_owner(old_owner),
+                    "new": self.format_owner(valid_additional_owner),
+                }
             else:
-                self.all_reaffected_videos.setdefault("other", {})[video] = (
-                    _("%(old)s replaced by %(new)s") % {
-                        "old": self.format_owner(old_owner),
-                        "new": self.format_owner(valid_additional_owner)
-                    }
-                )
+                self.all_reaffected_videos.setdefault("other", {})[video] = _(
+                    "%(old)s replaced by %(new)s"
+                ) % {
+                    "old": self.format_owner(old_owner),
+                    "new": self.format_owner(valid_additional_owner),
+                }
         return promoted_count
 
     def notify_manager(self):
@@ -200,7 +208,9 @@ class Command(BaseCommand):
                     }
                 msg_html += (
                     "<br>\n<p>"
-                    + _("For information, you will find below the list of reaffected videos.")
+                    + _(
+                        "For information, you will find below the list of reaffected videos."
+                    )
                     + "</p>"
                 )
 
@@ -247,7 +257,9 @@ class Command(BaseCommand):
                     )
                 if MANAGERS:
                     print(
-                        _("Manager(s) of “%(et)s” notified for %(nb)s reaffected video(s).")
+                        _(
+                            "Manager(s) of “%(et)s” notified for %(nb)s reaffected video(s)."
+                        )
                         % {"et": estab, "nb": len(self.all_reaffected_videos[estab])}
                     )
 
@@ -256,11 +268,22 @@ class Command(BaseCommand):
         name = video.owner.last_name + " " + video.owner.first_name
         msg_html = _("Hello %(name)s,") % {"name": name}
         msg_html += "<br>\n"
-        msg_html += "<p>" + _(
-            'You are now the owner of the video <a href="%(scheme)s:%(url)s">“%(title)s”</a>.'
-        ) % {"scheme": URL_SCHEME, "url": video.get_full_url(), "title": video.title} + "</p>\n"
-        msg_html += "\n<p>" + _("You were automatically designated as the owner because the previous owner is "
-                                "no longer at the institution and you were previously an additional owner.") + "</p>\n"
+        msg_html += (
+            "<p>"
+            + _(
+                'You are now the owner of the video <a href="%(scheme)s:%(url)s">“%(title)s”</a>.'
+            )
+            % {"scheme": URL_SCHEME, "url": video.get_full_url(), "title": video.title}
+            + "</p>\n"
+        )
+        msg_html += (
+            "\n<p>"
+            + _(
+                "You were automatically designated as the owner because the previous owner is "
+                "no longer at the institution and you were previously an additional owner."
+            )
+            + "</p>\n"
+        )
         msg_html += "\n<p>" + _("Regards") + "</p>\n"
         # self.stdout.write(f"{video.id} {video.title} {video.slug}")
 
@@ -272,7 +295,8 @@ class Command(BaseCommand):
                 % {"to_email": to_email, "title": video.title}
             )
         return send_mail(
-            "[%s] %s" % (__TITLE_SITE__, _("You have been designated as the owner of a video")),
+            "[%s] %s"
+            % (__TITLE_SITE__, _("You have been designated as the owner of a video")),
             striptags(msg_html),
             DEFAULT_FROM_EMAIL,
             to_email,
