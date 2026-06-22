@@ -1393,9 +1393,10 @@ function processProxyVttResponse(obj) {
  * @returns stripped line
  */
 function stripHtmlTags(line) {
-  return String(line).replace(/<[^>]*>/g, "").trim();
-};
-
+  return String(line)
+    .replace(/<[^>]*>/g, "")
+    .trim();
+}
 
 /**
  * Partial parser for WebVTT files based on the spec at http://dev.w3.org/html5/webvtt/
