@@ -522,7 +522,7 @@ Il faudra pour cela créer un fichier de langue et traduire chaque entrée.<br>
   >> Enfin, elles sont également ajoutées à l’ensemble `Vidéo à Supprimer`<br>
   >> (accessible via l’interface d’admin).<br>
   >>
-  >> ```python
+  >> ```py
   >> POD_ARCHIVE_AFFILIATION = ['faculty',
   >>                            'staff',
   >>                            'employee',
@@ -542,27 +542,31 @@ Il faudra pour cela créer un fichier de langue et traduire chaque entrée.<br>
   >> Liste de jours de délais avant l’obsolescence de la vidéo.<br>
   >> À chaque délai, le propriétaire reçoit un mail d’avertissement<br>
   >> pour éventuellement changer la date d’obsolescence de sa vidéo.<br>
-* `RESPIT_MODEL`
+* `RESPITE_MODEL`
   > valeur par défaut : `base`
   >> Choix du mode de calcul pour le répit des vidéos obsolètes.<br>
-  >> C'est le script qui va être exécuté par la commande respit_launcher<br>
+  >> C’est le script qui va être exécuté par la commande `respit_launcher`<br>
   >> dans le but d’étendre la durée de vie de la vidéo avec un mode de calcul<br>
   >> personnalisé. 'base' et 'criteria_model' sont des exemples dont vous<br>
   >> pouvez vous inspirer pour proposer votre propre modèle de répit.<br>
-* `RESPIT_MODEL_PARAMETERS`
-  > valeur par défaut : `['{', "   'respit_criteria_parameter': [],", "   'archiving_criteria_parameter': {", "       'excluded_title_terms': [],", "       'excluded_discipline_terms': [],", '   }', '}']`
-  >> Ensemble des paramètres qui vont pouvoir être utilisés par RESPIT_MODEL.<br>
-  >> Ces paramètres sont au format JSON et dépendent du modèle choisis.<br>
-  >> Pour 'criteria_model' il sera de la forme :<br>
-  >> {<br>
-  >> 'respit_criteria_parameter': [...],<br>
-  >> 'archiving_criteria_parameter': {<br>
-  >> 'minimum_expected_score': value,<br>
-  >> 'attribute_scores': [...],<br>
-  >> 'excluded_title_terms': [...],<br>
-  >> 'excluded_discipline_terms': [...],<br>
-  >> }<br>
-  >> }<br>
+* `RESPITE_MODEL_PARAMETERS`
+  > valeur par défaut : `{'respite_criteria_parameter': [], 'archiving_criteria_parameter': {'excluded_title_terms': [],'excluded_discipline_terms': []}}`
+  >> Ensemble des paramètres qui vont pouvoir être utilisés par RESPITE_MODEL.<br>
+  >> Ces paramètres sont au format JSON et dépendent du modèle choisi.<br>
+  >> Pour `criteria_model`, il sera de la forme :<br>
+  >>
+  >> ```json
+  >> {
+  >>    'respite_criteria_parameter': [...],
+  >>    'archiving_criteria_parameter': {
+  >>        'minimum_expected_score': value,
+  >>        'attribute_scores': [...],
+  >>        'excluded_title_terms': [...],
+  >>        'excluded_discipline_terms': [...],
+  >>    }
+  >> }
+  >> ```
+  >>
 * `ENABLE_PAGE_OBSO_MAIL`
   > valeur par défaut : `False`
   >> Active l’envoi d’un lien pour prendre une décision sur le futur de la vidéo durant la campagne de rappel instanciée par check_obsolete_video.<br>
@@ -868,7 +872,7 @@ Mettre `USE_AI_ENHANCEMENT` à True pour activer cette application.<br>
   > valeur par défaut : `False`
   >> Forcer la casse (minuscules ou majuscules) du nom d’utilisateur CAS<br>
   >> (permet de prévenir des doubles créations de comptes dans certains cas).<br>
-  >> Valeurs possibles : `lower`, `upper`, `False`.<br>
+  >> Valeurs possibles : `lower`, `upper`, `False`.<br>
 * `CAS_GATEWAY`
   > valeur par défaut : `False`
   >> Si True, authentifie automatiquement l’individu<br>
