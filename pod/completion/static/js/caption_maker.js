@@ -209,18 +209,14 @@ const send_form_save_captions = function () {
       try {
         const json = JSON.parse(data);
         if (json && json.track_id != undefined) {
-          showalert(
-            gettext("Creating new track…"),
-            "alert-info",
-          );
+          showalert(gettext("Creating new track…"), "alert-info");
           var url = new URL(window.location.href);
           var url_params = url.searchParams;
           url_params.set("src", json.track_id);
           url.search = url_params.toString();
           setTimeout(() => {
-              location.href = url.toString();
-            }, 1000
-          );
+            location.href = url.toString();
+          }, 1000);
           return;
         }
       } catch (e) {
