@@ -9,11 +9,23 @@ from bs4 import BeautifulSoup
 
 from ..settings import AUTH_PASSWORD_VALIDATORS, AUTHENTICATION_BACKENDS
 from ..settings import BASE_DIR as settings_base_dir
-from ..settings import (DEFAULT_AUTO_FIELD, INSTALLED_APPS, LOCALE_PATHS,
-                        LOG_DIRECTORY, LOGGING, MIDDLEWARE, REST_FRAMEWORK,
-                        ROOT_URLCONF, SERIALIZATION_MODULES, STATICFILES_DIRS,
-                        TAGULOUS_NAME_MAX_LENGTH, TEMPLATES, USE_I18N, USE_TZ,
-                        WSGI_APPLICATION)
+from ..settings import (
+    DEFAULT_AUTO_FIELD,
+    INSTALLED_APPS,
+    LOCALE_PATHS,
+    LOG_DIRECTORY,
+    LOGGING,
+    MIDDLEWARE,
+    REST_FRAMEWORK,
+    ROOT_URLCONF,
+    SERIALIZATION_MODULES,
+    STATICFILES_DIRS,
+    TAGULOUS_NAME_MAX_LENGTH,
+    TEMPLATES,
+    USE_I18N,
+    USE_TZ,
+    WSGI_APPLICATION,
+)
 
 USE_OPENCAST_STUDIO = True
 
