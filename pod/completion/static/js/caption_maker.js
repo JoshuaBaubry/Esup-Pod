@@ -199,13 +199,28 @@ const send_form_save_captions = function () {
       let parser = new DOMParser();
       let htmlDoc = parser.parseFromString(data, "text/html");
 
-      document.body.append(htmlDoc.getElementById("base-message-alert"));
-      if (data.track_id != undefined) {
-        var url = new URL(window.location.href);
-        var url_params = url.searchParams;
-        url_params.set("src", data.track_id);
-        url.search = url_params.toString();
-        location.href = url.toString();
+      // Append any server-provided alerts (base-message-alert)
+      const baseAlert = htmlDoc.getElementById("base-message-alert");
+      if (baseAlert) {
+        document.body.append(baseAlert);
+      }
+
+      // If server returned a JSON-like response containing track_id, redirect
+      try {
+        const json = JSON.parse(data);
+        if (json && json.track_id != undefined) {
+          showalert(gettext("Creating new track…"), "alert-info");
+          var url = new URL(window.location.href);
+          var url_params = url.searchParams;
+          url_params.set("src", json.track_id);
+          url.search = url_params.toString();
+          setTimeout(() => {
+            location.href = url.toString();
+          }, 1000);
+          return;
+        }
+      } catch (e) {
+        // not JSON — ignore
       }
     })
 
@@ -571,6 +586,15 @@ function generateWEBVTT() {
   if (vtt.length > 0) vtt = "WEBVTT" + vtt;
 
   return vtt;
+}
+
+/**
+ * Count displayed caption characters without line breaks.
+ * @param {string} captionText - Caption content
+ * @return {number} character count without carriage returns/new lines
+ */
+function getCaptionVisibleLength(captionText) {
+  return captionText.replace(/[\r\n]/g, "").length;
 }
 
 /**
@@ -965,7 +989,7 @@ function createCaptionBlock(newCaption, spawnFunction) {
       const nbCharsMsg = gettext("%s/%s characters");
       // Update numberCharactersDiv content
       const updateCharacterCount = () => {
-        let nbCharacters = this.captionTextInput.value.length;
+        let nbCharacters = getCaptionVisibleLength(this.captionTextInput.value);
         this.numberCharactersDiv.textContent = interpolate(nbCharsMsg, [
           nbCharacters,
           80,
@@ -1379,6 +1403,15 @@ function processProxyVttResponse(obj) {
 }
 
 /**
+ * Strip Html tags from given line
+ * @param {*} line  - line to be stripped
+ * @returns stripped line
+ */
+function stripHtmlTags(line) {
+  return String(line).replace(/[<>]/g, "").trim();
+}
+
+/**
  * Partial parser for WebVTT files based on the spec at http://dev.w3.org/html5/webvtt/
  * @param {[type]} vtt - VTT file content
  */
@@ -1398,7 +1431,6 @@ function parseAndLoadWebVTT(vtt) {
   var rxTimeLine = /^([\d.:]+)\s+-->\s+([\d.:]+)(?:\s.*)?$/;
   var rxCaptionLine = /^(?:<v\s+([^>]+)>)?([^\r\n]+)$/;
   var rxBlankLine = /^\s*$/;
-  var rxMarkup = /<[^>]>/g;
 
   var cueStart = null,
     cueEnd = null,
@@ -1443,7 +1475,7 @@ function parseAndLoadWebVTT(vtt) {
     var captionMatch = rxCaptionLine.exec(vttLines[i]);
     if (captionMatch && cueStart && cueEnd) {
       // captionMatch[1] is the optional voice (speaker) we're ignoring
-      var capLine = captionMatch[2].replace(rxMarkup, "");
+      var capLine = stripHtmlTags(captionMatch[2]);
       if (cueText)
         cueText += "\n" + capLine; // Add a line break for new lines
       else {

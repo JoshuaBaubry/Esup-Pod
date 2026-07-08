@@ -326,8 +326,8 @@ TINYMCE_DEFAULT_CONFIG = {
     "theme": "silver",
     "height": 500,
     "menubar": False,
-    "plugins": "advlist,autolink,lists,link,image,charmap,print,preview,anchor,"
-    "searchreplace,visualblocks,code,fullscreen,insertdatetime,media,table,paste,"
+    "plugins": "advlist,autolink,lists,link,image,charmap,preview,anchor,"
+    "searchreplace,visualblocks,code,fullscreen,insertdatetime,media,table,"
     "code,help,wordcount",
     "toolbar": "undo redo | formatselect | "
     "bold italic backcolor | alignleft aligncenter "
@@ -335,3 +335,17 @@ TINYMCE_DEFAULT_CONFIG = {
     "removeformat | help",
     "relative_urls": False,
 }
+
+RESPITE_MODEL = "base"
+ENABLE_PAGE_OBSO_MAIL = False
+PROLONGATION_GRANTED = False
+DELETION_GRANTED = False
+
+RESPITE_MODEL_PARAMETERS = {
+    "respite_criteria_parameter": [],
+    "archiving_criteria_parameter": {
+        "excluded_title_terms": [],
+        "excluded_discipline_terms": [],
+    },
+}
+DEFAULT_OWNER_USERNAME = "default_owner"
